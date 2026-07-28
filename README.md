@@ -5,6 +5,12 @@
 <h1 align="center">ABAP Claude Mirror</h1>
 
 <p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=abgunes.abap-claude-mirror">
+    <img src="https://img.shields.io/badge/VS%20Code%20Marketplace-Install-blue?logo=visualstudiocode" alt="Install from VS Code Marketplace" />
+  </a>
+</p>
+
+<p align="center">
   Lets <a href="https://claude.com/claude-code">Claude Code</a> read and edit ABAP objects opened through
   SAP's ABAP Development Tools (ADT) for VS Code — safely, with every change staying under your review.
 </p>
@@ -60,7 +66,8 @@ a warning notification instead of the edit silently vanishing.
 
 ## Getting started
 
-1. Install this extension alongside `sapse.adt-vscode`.
+1. Install [ABAP Claude Mirror](https://marketplace.visualstudio.com/items?itemName=abgunes.abap-claude-mirror)
+   from the VS Code Marketplace, alongside `sapse.adt-vscode`.
 2. Open any ABAP object through ADT as you normally would.
 3. That's it — the mirror file appears automatically, and Claude Code can read/edit it like any other file in your
    workspace.
@@ -95,7 +102,8 @@ corresponding object.
 
 ## Contributing
 
-Issues and pull requests are welcome once this repo is public — see the project's GitHub page for details.
+Issues and pull requests are welcome — see the [project's GitHub page](https://github.com/abgunes/ABAP-Claude-Mirror)
+for details.
 
 ## License
 
