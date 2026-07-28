@@ -1,0 +1,87 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ABAP (mirror view)",
+  "scopeName": "source.abapmirror",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#operators" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "match": "^\\s*\\*.*$",
+          "name": "comment.line.asterisk.abapmirror"
+        },
+        {
+          "match": "\".*$",
+          "name": "comment.line.double-quote.abapmirror"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "match": "'(?:[^'\\\\]|\\\\.)*'",
+          "name": "string.quoted.single.abapmirror"
+        },
+        {
+          "match": "`(?:[^`\\\\]|\\\\.)*`",
+          "name": "string.template.abapmirror"
+        },
+        {
+          "match": "\\|(?:[^|\\\\]|\\\\.)*\\|",
+          "name": "string.template.abapmirror"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "match": "\\b\\d+(?:\\.\\d+)?\\b",
+          "name": "constant.numeric.abapmirror"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "match": "\\b(?i)(type\\s+(?:(?:sorted|hashed|standard|any)\\s+)?table\\s+of|type\\s+range\\s+of)\\b",
+          "name": "keyword.control.abapmirror"
+        },
+        {
+          "match": "\\b(?i)(importing|exporting|changing|returning|raising|exceptions|preferred\\s+parameter|using|tables|type(?!\\s+type\\b)|ref\\s+to|like|value|optional|default|resumable|class|interface|method|methods|data(?!\\s+data\\b)|types|constants|field-symbols|form|function|definition|public|protected|private|abstract|final|static|instance|read-only|for\\s+testing|redefinition|event\\s+handler|class-data|class-methods|class-events)\\b",
+          "name": "keyword.control.abapmirror"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "match": "\\+|\\-|\\*|\\/|\\*\\*|div|mod",
+          "name": "keyword.operator.arithmetic.abapmirror"
+        },
+        {
+          "match": "=|<>|<|>|<=|>=",
+          "name": "keyword.operator.comparison.abapmirror"
+        },
+        {
+          "match": "=>|->|\\(|\\)|\\[|\\]|\\{|\\}",
+          "name": "punctuation.abapmirror"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b",
+          "name": "variable.other.abapmirror"
+        }
+      ]
+    }
+  }
+}
