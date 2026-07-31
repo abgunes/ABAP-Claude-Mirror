@@ -15,6 +15,10 @@
   SAP's ABAP Development Tools (ADT) for VS Code — safely, with every change staying under your review.
 </p>
 
+<p align="center">
+  <img src="images/demo.gif" alt="ABAP Claude Mirror demo — mirroring an open ADT object and syncing edits back" width="800" />
+</p>
+
 ---
 
 ## Why this exists
