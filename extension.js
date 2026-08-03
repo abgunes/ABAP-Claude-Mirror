@@ -72,15 +72,12 @@ async function pushMirrorChangeToAbap(mirrorPath) {
   if (!abapUriString) return;
 
   let abapDoc = vscode.workspace.textDocuments.find(d => d.uri.toString() === abapUriString);
+  let needsReveal = false;
 
   if (!abapDoc) {
     try {
       abapDoc = await vscode.workspace.openTextDocument(vscode.Uri.parse(abapUriString));
-      await vscode.window.showTextDocument(abapDoc, {
-        viewColumn: vscode.ViewColumn.Beside,
-        preview: true,
-        preserveFocus: false
-      });
+      needsReveal = true;
     } catch (e) {
       vscode.window.showWarningMessage(
         `ABAP Claude Mirror: could not reopen ${abapUriString} to sync change back (${e.message})`
@@ -91,6 +88,17 @@ async function pushMirrorChangeToAbap(mirrorPath) {
 
   const newContent = fs.readFileSync(mirrorPath, 'utf8');
   if (abapDoc.getText() === newContent) return;
+
+  // Only reveal/focus a freshly-reopened tab once we know an edit is
+  // actually about to be applied. A no-op mirror write (content already
+  // matches) must not pop open and steal focus for nothing.
+  if (needsReveal) {
+    await vscode.window.showTextDocument(abapDoc, {
+      viewColumn: vscode.ViewColumn.Beside,
+      preview: true,
+      preserveFocus: false
+    });
+  }
 
   const fullRange = new vscode.Range(
     abapDoc.positionAt(0),
