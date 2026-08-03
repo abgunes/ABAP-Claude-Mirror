@@ -19,6 +19,9 @@ const syncStateStore = createSyncStateStore();
 // single-object mirrors, these keep their mirrorToAbapUri entry even after
 // their ADT tab closes, so a later edit can still find its way back.
 const bulkTrackedMirrors = new Set();
+// where per-object failures during bulk mirroring are logged, since the
+// progress notification only has room for a final count.
+const outputChannel = vscode.window.createOutputChannel('ABAP Claude Mirror');
 
 function isEnabled() {
   return vscode.workspace.getConfiguration('abapClaudeMirror').get('enabled', true);
@@ -228,6 +231,7 @@ async function mirrorFolderCommand(uriArg) {
             syncStateStore.register(mirrorPath);
             mirrored++;
           } catch (e) {
+            outputChannel.appendLine(`Skipped ${objectUri.toString()}: ${e.message}`);
             skipped++;
           }
           progress.report({ message: `${mirrored + skipped} / ${leaves.length}` });
@@ -238,7 +242,7 @@ async function mirrorFolderCommand(uriArg) {
   );
 
   vscode.window.showInformationMessage(
-    `ABAP Claude Mirror: ${mirrored} object(s) mirrored${skipped ? `, ${skipped} skipped` : ''}.`
+    `ABAP Claude Mirror: ${mirrored} object(s) mirrored${skipped ? `, ${skipped} skipped (see "ABAP Claude Mirror" output channel for details)` : ''}.`
   );
 }
 
@@ -248,6 +252,7 @@ function activate(context) {
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(handleActiveEditorChange));
   context.subscriptions.push(vscode.commands.registerCommand('abapClaudeMirror.openMirror', openMirrorCommand));
   context.subscriptions.push(vscode.commands.registerCommand('abapClaudeMirror.mirrorFolder', mirrorFolderCommand));
+  context.subscriptions.push(outputChannel);
 
   context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => {
     if (isEnabled() && e.document.uri.scheme === 'abap') {
