@@ -205,7 +205,13 @@ async function mirrorFolderCommand(uriArg) {
 
   let leaves;
   try {
-    leaves = await collectLeaves(fsLike, vscode.FileType.Directory, folderUri, joinChild);
+    leaves = await collectLeaves(
+      fsLike,
+      vscode.FileType.Directory,
+      folderUri,
+      joinChild,
+      (uri, e) => outputChannel.appendLine(`Could not list ${uri.toString()}: ${e.message}`)
+    );
   } catch (e) {
     vscode.window.showErrorMessage(`ABAP Claude Mirror: could not read folder contents (${e.message})`);
     return;

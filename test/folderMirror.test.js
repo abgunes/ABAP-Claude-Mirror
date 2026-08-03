@@ -49,6 +49,27 @@ test('collectLeaves returns empty array for an empty folder', async () => {
   assert.deepEqual(leaves, []);
 });
 
+test('collectLeaves skips a subfolder whose readDirectory fails, but still walks its siblings and reports the error', async () => {
+  const tree = new Map([
+    ['root', [['pkgA', DIR], ['pkgB', DIR], ['obj1.prog.abap', FILE]]],
+    // 'root/pkgA' is intentionally absent from the tree, so makeFakeFs throws for it.
+    ['root/pkgB', [['obj2.clas.abap', FILE]]],
+  ]);
+  const fsLike = makeFakeFs(tree);
+  const errors = [];
+  const onError = (uri, error) => errors.push({ uri, error });
+
+  const leaves = await collectLeaves(fsLike, DIR, 'root', joinChild, onError);
+
+  assert.deepEqual(
+    leaves.sort(),
+    ['root/obj1.prog.abap', 'root/pkgB/obj2.clas.abap'].sort()
+  );
+  assert.equal(errors.length, 1);
+  assert.equal(errors[0].uri, 'root/pkgA');
+  assert.match(errors[0].error.message, /no entries for root\/pkgA/);
+});
+
 test('shouldConfirm is false at or below the threshold, true above it', () => {
   assert.equal(shouldConfirm(DEFAULT_CONFIRM_THRESHOLD), false);
   assert.equal(shouldConfirm(DEFAULT_CONFIRM_THRESHOLD + 1), true);

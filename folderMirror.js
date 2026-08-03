@@ -1,11 +1,17 @@
 const DEFAULT_CONFIRM_THRESHOLD = 200;
 const DEFAULT_READ_CONCURRENCY = 5;
 
-async function collectLeaves(fsLike, directoryFileType, rootUri, joinChild) {
+async function collectLeaves(fsLike, directoryFileType, rootUri, joinChild, onError) {
   const leaves = [];
 
   async function walk(uri) {
-    const entries = await fsLike.readDirectory(uri);
+    let entries;
+    try {
+      entries = await fsLike.readDirectory(uri);
+    } catch (error) {
+      if (onError) onError(uri, error);
+      return;
+    }
     for (const [name, type] of entries) {
       const childUri = joinChild(uri, name);
       if (type === directoryFileType) {
