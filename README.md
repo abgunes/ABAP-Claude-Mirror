@@ -49,6 +49,8 @@ understands real files) can now work with the ABAP code you're actively looking 
 - **ABAP-flavored syntax highlighting** in the mirror view: comments, strings (including `|string templates|`),
   numbers, keywords, operators, and punctuation are colored to match ADT's own conventions.
 - **One-flag kill switch**: `abapClaudeMirror.enabled` turns the whole thing off instantly, no reload required.
+- **Mirror a whole folder at once**: right-click any ABAP package (or other folder) in ADT's Explorer tree and choose **ABAP Claude Mirror - Mirror Folder (with Sub-Objects)** to mirror every object under it, recursively, without opening an editor tab per object. Folders with more than 200 objects ask for confirmation first.
+- **ABAP Mirror Files status view**: a new panel in the Explorer sidebar lists every mirrored object in the same hierarchy as ADT's own tree. An object shows red when its ADT document has unsaved changes pending, blue once it's saved. Folders containing an unsaved object expand automatically so you can spot it at a glance.
 
 ## How it works
 
@@ -65,8 +67,11 @@ never triggers ADT's activate/transport flow. You'll see the change land in the 
 unsaved-changes indicator. Nothing reaches the SAP backend until you review it yourself and save/activate through
 ADT as usual (`Ctrl+S`, or ADT's own Activate command).
 
-If the original ADT tab has already been closed, a change to its mirror file can't be pushed anywhere: you'll get
-a warning notification instead of the edit silently vanishing.
+If a mirror file changes while its original ADT document isn't open, the extension reopens that document
+automatically (revealed beside your editor, not focused) and applies the change to its buffer, still without
+ever calling save. This is how mirrored objects from **Mirror Folder** stay in sync even though most of them are
+never opened by hand. If the original object can no longer be resolved at all (for example, it was deleted from
+the package), you'll get a warning notification instead of the edit silently vanishing.
 
 ## Getting started
 
@@ -103,6 +108,11 @@ corresponding object.
   write lands last wins.
 - The bundled grammar is a close approximation of ADT's own ABAP highlighting rather than a byte-for-byte copy, so
   colors can differ slightly depending on your theme.
+- Mirroring a folder is a snapshot: objects added to that package afterward won't appear until you run
+  **Mirror Folder** again.
+- The mirror status view's red/blue coloring is provided through VS Code's file decoration API, which is
+  per-file rather than per-view, so the same coloring may also show up on a mirrored file elsewhere in VS Code
+  (for example, an open editor tab), not only inside the ABAP Mirror Files panel.
 
 ## Contributing
 
