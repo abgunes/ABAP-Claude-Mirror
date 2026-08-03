@@ -80,6 +80,14 @@
         "scopeName": "source.abapmirror",
         "path": "./syntaxes/abap-mirror.tmLanguage.json"
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "abapClaudeMirrorFiles",
+          "name": "ABAP Mirror Files"
+        }
+      ]
+    }
   }
 }

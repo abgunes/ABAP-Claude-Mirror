@@ -4,6 +4,7 @@ const path = require('path');
 const os = require('os');
 const { collectLeaves, shouldConfirm, runWithConcurrency, DEFAULT_CONFIRM_THRESHOLD, DEFAULT_READ_CONCURRENCY } = require('./folderMirror');
 const { createSyncStateStore } = require('./syncState');
+const { MirrorTreeDataProvider, MirrorDecorationProvider } = require('./mirrorTreeProvider');
 
 const MIRROR_ROOT = path.join(os.homedir(), '.claude-abap-mirror');
 const mirrorToAbapUri = new Map();
@@ -260,6 +261,12 @@ async function mirrorFolderCommand(uriArg) {
 
 function activate(context) {
   if (!fs.existsSync(MIRROR_ROOT)) fs.mkdirSync(MIRROR_ROOT, { recursive: true });
+
+  const mirrorTreeProvider = new MirrorTreeDataProvider(MIRROR_ROOT, syncStateStore);
+  context.subscriptions.push(vscode.window.registerTreeDataProvider('abapClaudeMirrorFiles', mirrorTreeProvider));
+
+  const mirrorDecorationProvider = new MirrorDecorationProvider(syncStateStore);
+  context.subscriptions.push(vscode.window.registerFileDecorationProvider(mirrorDecorationProvider));
 
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(handleActiveEditorChange));
   context.subscriptions.push(vscode.commands.registerCommand('abapClaudeMirror.openMirror', openMirrorCommand));
