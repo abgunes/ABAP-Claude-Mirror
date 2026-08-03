@@ -10,13 +10,17 @@ class MirrorTreeDataProvider {
     this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     this._tree = null;
 
-    syncStateStore.onDidChange(() => this.refresh());
+    this._syncListener = syncStateStore.onDidChange(() => this.refresh());
     this.refresh();
   }
 
   refresh() {
     this._tree = buildMirrorTree(this.mirrorRoot, this.syncStateStore.entries());
     this._onDidChangeTreeData.fire(undefined);
+  }
+
+  dispose() {
+    this._syncListener.dispose();
   }
 
   getChildren(element) {
@@ -57,7 +61,11 @@ class MirrorDecorationProvider {
     this._onDidChangeFileDecorations = new vscode.EventEmitter();
     this.onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
 
-    syncStateStore.onDidChange(() => this._onDidChangeFileDecorations.fire(undefined));
+    this._syncListener = syncStateStore.onDidChange(() => this._onDidChangeFileDecorations.fire(undefined));
+  }
+
+  dispose() {
+    this._syncListener.dispose();
   }
 
   provideFileDecoration(uri) {

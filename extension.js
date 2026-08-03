@@ -264,9 +264,11 @@ function activate(context) {
 
   const mirrorTreeProvider = new MirrorTreeDataProvider(MIRROR_ROOT, syncStateStore);
   context.subscriptions.push(vscode.window.registerTreeDataProvider('abapClaudeMirrorFiles', mirrorTreeProvider));
+  context.subscriptions.push(mirrorTreeProvider);
 
   const mirrorDecorationProvider = new MirrorDecorationProvider(syncStateStore);
   context.subscriptions.push(vscode.window.registerFileDecorationProvider(mirrorDecorationProvider));
+  context.subscriptions.push(mirrorDecorationProvider);
 
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(handleActiveEditorChange));
   context.subscriptions.push(vscode.commands.registerCommand('abapClaudeMirror.openMirror', openMirrorCommand));
