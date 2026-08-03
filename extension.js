@@ -70,12 +70,22 @@ async function pushMirrorChangeToAbap(mirrorPath) {
   const abapUriString = mirrorToAbapUri.get(mirrorPath);
   if (!abapUriString) return;
 
-  const abapDoc = vscode.workspace.textDocuments.find(d => d.uri.toString() === abapUriString);
+  let abapDoc = vscode.workspace.textDocuments.find(d => d.uri.toString() === abapUriString);
+
   if (!abapDoc) {
-    vscode.window.showWarningMessage(
-      'ABAP Claude Mirror: source tab is closed, could not sync change back to ' + abapUriString
-    );
-    return;
+    try {
+      abapDoc = await vscode.workspace.openTextDocument(vscode.Uri.parse(abapUriString));
+      await vscode.window.showTextDocument(abapDoc, {
+        viewColumn: vscode.ViewColumn.Beside,
+        preview: true,
+        preserveFocus: false
+      });
+    } catch (e) {
+      vscode.window.showWarningMessage(
+        `ABAP Claude Mirror: could not reopen ${abapUriString} to sync change back (${e.message})`
+      );
+      return;
+    }
   }
 
   const newContent = fs.readFileSync(mirrorPath, 'utf8');
@@ -105,6 +115,7 @@ async function revealMirror(doc, { force = false } = {}) {
   const mirrorPath = mirrorPathFor(doc.uri);
   mirrorToAbapUri.set(mirrorPath, doc.uri.toString());
   writeMirrorIfChanged(mirrorPath, doc.getText());
+  syncStateStore.register(mirrorPath);
 
   const isMirrorVisible = vscode.window.visibleTextEditors.some(
     e => e.document.uri.fsPath === mirrorPath
@@ -133,6 +144,7 @@ async function handleActiveEditorChange(editor) {
   const mirrorPath = mirrorPathFor(doc.uri);
   mirrorToAbapUri.set(mirrorPath, uriString);
   writeMirrorIfChanged(mirrorPath, doc.getText());
+  syncStateStore.register(mirrorPath);
 
   // Respect a manual close of the mirror tab — don't force it back open
   // just because you clicked back onto the original ABAP tab.
@@ -259,6 +271,18 @@ function activate(context) {
       const mirrorPath = mirrorPathFor(e.document.uri);
       mirrorToAbapUri.set(mirrorPath, e.document.uri.toString());
       writeMirrorIfChanged(mirrorPath, e.document.getText());
+      if (e.document.isDirty) {
+        syncStateStore.markChanged(mirrorPath);
+      } else {
+        syncStateStore.markSynced(mirrorPath);
+      }
+    }
+  }));
+
+  context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(doc => {
+    if (isEnabled() && doc.uri.scheme === 'abap') {
+      const mirrorPath = mirrorPathFor(doc.uri);
+      syncStateStore.markSynced(mirrorPath);
     }
   }));
 
@@ -266,11 +290,14 @@ function activate(context) {
     if (!isEnabled()) return;
 
     if (doc.uri.scheme === 'abap') {
-      // Original ABAP tab closed — close its mirror too and forget any
+      // Original ABAP tab closed: close its mirror too and forget any
       // manual-close/auto-revealed state, so reopening the object later
-      // reveals fresh.
+      // reveals fresh. Bulk-tracked mirrors (from "Mirror Folder") keep
+      // their tracking entry so a later edit can still sync back.
       const mirrorPath = mirrorPathFor(doc.uri);
-      mirrorToAbapUri.delete(mirrorPath);
+      if (!bulkTrackedMirrors.has(mirrorPath)) {
+        mirrorToAbapUri.delete(mirrorPath);
+      }
       manuallyClosedMirrors.delete(doc.uri.toString());
       autoRevealedMirrors.delete(doc.uri.toString());
       closeMirrorEditor(mirrorPath);
