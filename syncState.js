@@ -1,4 +1,4 @@
-const { EventEmitter } = require('events');
+const { EventEmitter } = require('node:events');
 
 function createSyncStateStore() {
   const state = new Map();
