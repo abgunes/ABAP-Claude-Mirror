@@ -37,6 +37,10 @@
       {
         "command": "abapClaudeMirror.openMirror",
         "title": "ABAP Claude Mirror - Open Mirror Object"
+      },
+      {
+        "command": "abapClaudeMirror.mirrorFolder",
+        "title": "ABAP Claude Mirror - Mirror Folder (with Sub-Objects)"
       }
     ],
     "menus": {
@@ -51,6 +55,13 @@
         {
           "command": "abapClaudeMirror.openMirror",
           "when": "resourceScheme == abap",
+          "group": "z_abapClaudeMirror@1"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "abapClaudeMirror.mirrorFolder",
+          "when": "resourceScheme == abap && explorerResourceIsFolder",
           "group": "z_abapClaudeMirror@1"
         }
       ]
