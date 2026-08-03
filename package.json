@@ -21,7 +21,7 @@
   "categories": ["Programming Languages", "Other"],
   "keywords": ["abap", "adt", "sap", "claude", "claude code", "mirror"],
   "activationEvents": ["onStartupFinished"],
-  "main": "./extension.js",
+  "main": "./src/extension.js",
   "contributes": {
     "configuration": {
       "title": "ABAP Claude Mirror",

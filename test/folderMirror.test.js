@@ -5,7 +5,7 @@ const {
   shouldConfirm,
   runWithConcurrency,
   DEFAULT_CONFIRM_THRESHOLD,
-} = require('../folderMirror');
+} = require('../src/folderMirror');
 
 const DIR = 'directory';
 const FILE = 'file';

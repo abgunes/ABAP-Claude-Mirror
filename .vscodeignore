@@ -2,3 +2,6 @@ test/
 docs/
 .git*
 *.vsix
+.superpowers/
+.claude/
+images/demo.gif
