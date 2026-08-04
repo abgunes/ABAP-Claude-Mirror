@@ -1,30 +1,32 @@
-// mirrorTreeProvider.js
-const vscode = require('vscode');
-const { buildMirrorTree, folderContainsChanged } = require('../out/mirrorTree');
+import * as vscode from 'vscode';
+import { buildMirrorTree, folderContainsChanged, MirrorFolderNode, MirrorNode } from './mirrorTree';
+import type { SyncStateStore } from './syncState';
 
-class MirrorTreeDataProvider {
-  constructor(mirrorRoot, syncStateStore) {
-    this.mirrorRoot = mirrorRoot;
-    this.syncStateStore = syncStateStore;
-    this._onDidChangeTreeData = new vscode.EventEmitter();
-    this.onDidChangeTreeData = this._onDidChangeTreeData.event;
-    this._tree = null;
+export class MirrorTreeDataProvider implements vscode.TreeDataProvider<MirrorNode> {
+  private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();
+  readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+  private _tree: MirrorFolderNode | null = null;
+  private readonly _syncListener: { dispose(): void };
 
+  constructor(
+    private readonly mirrorRoot: string,
+    private readonly syncStateStore: SyncStateStore
+  ) {
     this._syncListener = syncStateStore.onDidChange(() => this.refresh());
     this.refresh();
   }
 
-  refresh() {
+  refresh(): void {
     this._tree = buildMirrorTree(this.mirrorRoot, this.syncStateStore.entries());
-    this._onDidChangeTreeData.fire(undefined);
+    this._onDidChangeTreeData.fire();
   }
 
-  dispose() {
+  dispose(): void {
     this._syncListener.dispose();
   }
 
-  getChildren(element) {
-    const node = element || this._tree;
+  getChildren(element?: MirrorNode): MirrorNode[] {
+    const node = element ?? this._tree;
     if (!node || node.type !== 'folder') return [];
     return Array.from(node.children.values()).sort((a, b) => {
       if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
@@ -32,7 +34,7 @@ class MirrorTreeDataProvider {
     });
   }
 
-  getTreeItem(node) {
+  getTreeItem(node: MirrorNode): vscode.TreeItem {
     if (node.type === 'folder') {
       const collapsibleState = folderContainsChanged(node)
         ? vscode.TreeItemCollapsibleState.Expanded
@@ -55,20 +57,20 @@ class MirrorTreeDataProvider {
   }
 }
 
-class MirrorDecorationProvider {
-  constructor(syncStateStore) {
-    this.syncStateStore = syncStateStore;
-    this._onDidChangeFileDecorations = new vscode.EventEmitter();
-    this.onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
+export class MirrorDecorationProvider implements vscode.FileDecorationProvider {
+  private readonly _onDidChangeFileDecorations = new vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined>();
+  readonly onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
+  private readonly _syncListener: { dispose(): void };
 
+  constructor(private readonly syncStateStore: SyncStateStore) {
     this._syncListener = syncStateStore.onDidChange(() => this._onDidChangeFileDecorations.fire(undefined));
   }
 
-  dispose() {
+  dispose(): void {
     this._syncListener.dispose();
   }
 
-  provideFileDecoration(uri) {
+  provideFileDecoration(uri: vscode.Uri): vscode.FileDecoration | undefined {
     const state = this.syncStateStore.get(uri.fsPath);
     if (state === 'changed') {
       return { badge: 'M', color: new vscode.ThemeColor('charts.red'), tooltip: 'Mirror file: unsaved changes pending in ADT' };
@@ -79,5 +81,3 @@ class MirrorDecorationProvider {
     return undefined;
   }
 }
-
-module.exports = { MirrorTreeDataProvider, MirrorDecorationProvider };

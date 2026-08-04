@@ -5,3 +5,7 @@ docs/
 .superpowers/
 .claude/
 images/demo.gif
+src/
+tsconfig.json
+node_modules/
+out/**/*.map

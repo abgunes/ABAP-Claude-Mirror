@@ -1,38 +1,44 @@
-const vscode = require('vscode');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const { collectLeaves, shouldConfirm, runWithConcurrency, DEFAULT_CONFIRM_THRESHOLD, DEFAULT_READ_CONCURRENCY } = require('../out/folderMirror');
-const { createSyncStateStore } = require('../out/syncState');
-const { MirrorTreeDataProvider, MirrorDecorationProvider } = require('./mirrorTreeProvider');
+import * as vscode from 'vscode';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as os from 'node:os';
+import {
+  collectLeaves,
+  shouldConfirm,
+  runWithConcurrency,
+  DEFAULT_CONFIRM_THRESHOLD,
+  DEFAULT_READ_CONCURRENCY,
+} from './folderMirror';
+import { createSyncStateStore } from './syncState';
+import { MirrorTreeDataProvider, MirrorDecorationProvider } from './mirrorTreeProvider';
 
 const MIRROR_ROOT = path.join(os.homedir(), '.abap-mirror');
-const mirrorToAbapUri = new Map();
+const mirrorToAbapUri = new Map<string, string>();
 // abap uris whose mirror the user closed on purpose: do not auto-reopen
 // until the abap tab itself is closed and reopened fresh.
-const manuallyClosedMirrors = new Set();
+const manuallyClosedMirrors = new Set<string>();
 // abap uris that already got their one automatic reveal. After that,
 // refocusing the abap tab must NOT steal focus back to the mirror; the
 // user has to ask for it again via the "Open Mirrored File" command.
-const autoRevealedMirrors = new Set();
+const autoRevealedMirrors = new Set<string>();
 const syncStateStore = createSyncStateStore();
 // mirror paths registered via the bulk "Mirror Folder" command. Unlike
 // single-object mirrors, these keep their mirrorToAbapUri entry even after
 // their ADT tab closes, so a later edit can still find its way back.
-const bulkTrackedMirrors = new Set();
+const bulkTrackedMirrors = new Set<string>();
 // where per-object failures during bulk mirroring are logged, since the
 // progress notification only has room for a final count.
 const outputChannel = vscode.window.createOutputChannel('ABAP Mirror');
 
-function isEnabled() {
+function isEnabled(): boolean {
   return vscode.workspace.getConfiguration('abapMirror').get('enabled', true);
 }
 
-function sanitizeSegment(segment) {
+function sanitizeSegment(segment: string): string {
   return segment.replace(/[<>:"|?*]/g, '_');
 }
 
-function mirrorPathFor(uri) {
+function mirrorPathFor(uri: vscode.Uri): string {
   const segments = uri.path.split('/').filter(Boolean).map(sanitizeSegment);
   const leaf = segments.pop() || 'unnamed';
   // Nest mirrors under a folder tree matching the ABAP repository path, so
@@ -53,11 +59,11 @@ function mirrorPathFor(uri) {
   return vscode.Uri.file(rawPath).fsPath;
 }
 
-function writeMirrorIfChanged(mirrorPath, content) {
-  let existing = null;
+function writeMirrorIfChanged(mirrorPath: string, content: string): void {
+  let existing: string | null = null;
   try {
     existing = fs.readFileSync(mirrorPath, 'utf8');
-  } catch (e) {
+  } catch {
     // mirror doesn't exist yet
   }
   if (existing === content) return;
@@ -66,7 +72,7 @@ function writeMirrorIfChanged(mirrorPath, content) {
   fs.writeFileSync(mirrorPath, content, 'utf8');
 }
 
-async function pushMirrorChangeToAbap(mirrorPath) {
+async function pushMirrorChangeToAbap(mirrorPath: string): Promise<void> {
   if (!isEnabled()) return;
   const abapUriString = mirrorToAbapUri.get(mirrorPath);
   if (!abapUriString) return;
@@ -80,7 +86,7 @@ async function pushMirrorChangeToAbap(mirrorPath) {
       needsReveal = true;
     } catch (e) {
       vscode.window.showWarningMessage(
-        `ABAP Mirror: could not reopen ${abapUriString} to sync change back (${e.message})`
+        `ABAP Mirror: could not reopen ${abapUriString} to sync change back (${(e as Error).message})`
       );
       return;
     }
@@ -96,7 +102,7 @@ async function pushMirrorChangeToAbap(mirrorPath) {
     await vscode.window.showTextDocument(abapDoc, {
       viewColumn: vscode.ViewColumn.Beside,
       preview: true,
-      preserveFocus: false
+      preserveFocus: false,
     });
   }
 
@@ -109,7 +115,7 @@ async function pushMirrorChangeToAbap(mirrorPath) {
   await vscode.workspace.applyEdit(edit);
 }
 
-async function closeMirrorEditor(mirrorPath) {
+async function closeMirrorEditor(mirrorPath: string): Promise<void> {
   const mirrorUriString = vscode.Uri.file(mirrorPath).toString();
   for (const group of vscode.window.tabGroups.all) {
     for (const tab of group.tabs) {
@@ -120,7 +126,7 @@ async function closeMirrorEditor(mirrorPath) {
   }
 }
 
-async function revealMirror(doc, { force = false } = {}) {
+async function revealMirror(doc: vscode.TextDocument, { force = false } = {}): Promise<void> {
   const mirrorPath = mirrorPathFor(doc.uri);
   mirrorToAbapUri.set(mirrorPath, doc.uri.toString());
   writeMirrorIfChanged(mirrorPath, doc.getText());
@@ -140,11 +146,11 @@ async function revealMirror(doc, { force = false } = {}) {
   await vscode.window.showTextDocument(mirrorDoc, {
     viewColumn: vscode.ViewColumn.Beside,
     preview: true,
-    preserveFocus: false
+    preserveFocus: false,
   });
 }
 
-async function handleActiveEditorChange(editor) {
+async function handleActiveEditorChange(editor: vscode.TextEditor | undefined): Promise<void> {
   if (!editor || !isEnabled()) return;
   const doc = editor.document;
   if (doc.uri.scheme !== 'abap') return;
@@ -169,7 +175,7 @@ async function handleActiveEditorChange(editor) {
   await revealMirror(doc);
 }
 
-async function openMirrorCommand(uriArg) {
+async function openMirrorCommand(uriArg: unknown): Promise<void> {
   if (!isEnabled()) {
     vscode.window.showWarningMessage('ABAP Mirror is disabled (abapMirror.enabled).');
     return;
@@ -196,7 +202,7 @@ async function openMirrorCommand(uriArg) {
   await revealMirror(doc, { force: true });
 }
 
-async function mirrorFolderCommand(uriArg) {
+async function mirrorFolderCommand(uriArg: unknown): Promise<void> {
   if (!isEnabled()) {
     vscode.window.showWarningMessage('ABAP Mirror is disabled (abapMirror.enabled).');
     return;
@@ -208,10 +214,10 @@ async function mirrorFolderCommand(uriArg) {
     return;
   }
 
-  const fsLike = { readDirectory: (uri) => vscode.workspace.fs.readDirectory(uri) };
-  const joinChild = (parentUri, name) => vscode.Uri.joinPath(parentUri, name);
+  const fsLike = { readDirectory: (uri: vscode.Uri) => Promise.resolve(vscode.workspace.fs.readDirectory(uri)) };
+  const joinChild = (parentUri: vscode.Uri, name: string) => vscode.Uri.joinPath(parentUri, name);
 
-  let leaves;
+  let leaves: vscode.Uri[];
   try {
     leaves = await collectLeaves(
       fsLike,
@@ -221,7 +227,7 @@ async function mirrorFolderCommand(uriArg) {
       (uri, e) => outputChannel.appendLine(`Could not list ${uri.toString()}: ${e.message}`)
     );
   } catch (e) {
-    vscode.window.showErrorMessage(`ABAP Mirror: could not read folder contents (${e.message})`);
+    vscode.window.showErrorMessage(`ABAP Mirror: could not read folder contents (${(e as Error).message})`);
     return;
   }
 
@@ -258,7 +264,7 @@ async function mirrorFolderCommand(uriArg) {
             syncStateStore.register(mirrorPath);
             mirrored++;
           } catch (e) {
-            outputChannel.appendLine(`Skipped ${objectUri.toString()}: ${e.message}`);
+            outputChannel.appendLine(`Skipped ${objectUri.toString()}: ${(e as Error).message}`);
             skipped++;
           }
           progress.report({ message: `${mirrored + skipped} / ${leaves.length}` });
@@ -273,7 +279,7 @@ async function mirrorFolderCommand(uriArg) {
   );
 }
 
-function activate(context) {
+export function activate(context: vscode.ExtensionContext): void {
   if (!fs.existsSync(MIRROR_ROOT)) fs.mkdirSync(MIRROR_ROOT, { recursive: true });
 
   const mirrorTreeProvider = new MirrorTreeDataProvider(MIRROR_ROOT, syncStateStore);
@@ -347,6 +353,4 @@ function activate(context) {
   }
 }
 
-function deactivate() {}
-
-module.exports = { activate, deactivate };
+export function deactivate(): void {}
