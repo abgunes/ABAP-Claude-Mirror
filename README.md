@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="images/icon.png" width="160" alt="ABAP Claude Mirror logo" />
+  <img src="images/icon.png" width="160" alt="ABAP Mirror logo" />
 </p>
 
-<h1 align="center">ABAP Claude Mirror</h1>
+<h1 align="center">ABAP Mirror</h1>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=abgunes.abap-claude-mirror">
+  <a href="https://marketplace.visualstudio.com/items?itemName=abgunes.abap-mirror">
     <img src="https://img.shields.io/badge/VS%20Code%20Marketplace-Install-blue?logo=visualstudiocode" alt="Install from VS Code Marketplace" />
   </a>
 </p>
@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <img src="images/demo.gif" alt="ABAP Claude Mirror demo: mirroring an open ADT object and syncing edits back" width="800" />
+  <img src="images/demo.gif" alt="ABAP Mirror demo: mirroring an open ADT object and syncing edits back" width="800" />
 </p>
 
 ---
@@ -32,30 +32,30 @@ That's a problem for AI coding assistants like Claude Code, which read and write
 From Claude's point of view, an open `abap://` tab simply doesn't exist: it can't read the code you're looking at,
 and it can't propose an edit to it.
 
-**ABAP Claude Mirror** closes that gap. It mirrors whatever ABAP object you have open to a real file on disk, keeps
+**ABAP Mirror** closes that gap. It mirrors whatever ABAP object you have open to a real file on disk, keeps
 it in sync in both directions, and gets out of the way otherwise. Claude Code (or any other tool that only
 understands real files) can now work with the ABAP code you're actively looking at in ADT.
 
 ## Features
 
 - **Automatic mirroring**: open any object in ADT and its source is written to a real file under
-  `~/.claude-abap-mirror/`, nested in a folder tree that matches the object's repository path.
+  `~/.abap-mirror/`, nested in a folder tree that matches the object's repository path.
 - **Two-way live sync**: keep typing in the ADT tab and the mirror updates automatically; edit the mirror file
   (by hand, or by asking Claude Code to change it) and the change flows back into the ADT document buffer.
 - **Opens once, then stays out of your way**: the mirror pane reveals itself automatically the first time you
   look at a given object. After that, switching tabs away and back won't keep stealing focus back to it.
-- **Open it back up anytime**: right-click any ADT `abap://` document and choose **ABAP Claude Mirror - Open
+- **Open it back up anytime**: right-click any ADT `abap://` document and choose **ABAP Mirror - Open
   Mirror Object**, or run the same command from the Command Palette.
 - **ABAP-flavored syntax highlighting** in the mirror view: comments, strings (including `|string templates|`),
   numbers, keywords, operators, and punctuation are colored to match ADT's own conventions.
-- **One-flag kill switch**: `abapClaudeMirror.enabled` turns the whole thing off instantly, no reload required.
-- **Mirror a whole folder at once**: right-click any ABAP package (or other folder) in ADT's Explorer tree and choose **ABAP Claude Mirror - Mirror Folder (with Sub-Objects)** to mirror every object under it, recursively, without opening an editor tab per object. Folders with more than 200 objects ask for confirmation first.
+- **One-flag kill switch**: `abapMirror.enabled` turns the whole thing off instantly, no reload required.
+- **Mirror a whole folder at once**: right-click any ABAP package (or other folder) in ADT's Explorer tree and choose **ABAP Mirror - Mirror Folder (with Sub-Objects)** to mirror every object under it, recursively, without opening an editor tab per object. Folders with more than 200 objects ask for confirmation first.
 - **ABAP Mirror Files status view**: a new panel in the Explorer sidebar lists every mirrored object in the same hierarchy as ADT's own tree. An object shows red when its ADT document has unsaved changes pending, blue once it's saved. Folders containing an unsaved object expand automatically so you can spot it at a glance.
 
 ## How it works
 
 1. You open (or switch focus to) an ABAP object in ADT.
-2. The extension writes its current text to a mirror file under `~/.claude-abap-mirror/`.
+2. The extension writes its current text to a mirror file under `~/.abap-mirror/`.
 3. The mirror opens beside the original the first time, so Claude Code's active-file context picks up a real,
    readable file.
 4. From then on, edits on either side are synced to the other automatically, so you don't need to keep both tabs focused.
@@ -71,11 +71,11 @@ If a mirror file changes while its original ADT document isn't open, the extensi
 automatically (revealed beside your editor, not focused) and applies the change to its buffer, still without
 ever calling save. This is how mirrored objects from **Mirror Folder** stay in sync even though most of them are
 never opened by hand. If the original object can no longer be resolved at all (for example, it was deleted from
-the package), you'll get a warning notification instead of the edit silently vanishing.
+the package), you will get a warning notification instead of the edit silently vanishing.
 
 ## Getting started
 
-1. Install [ABAP Claude Mirror](https://marketplace.visualstudio.com/items?itemName=abgunes.abap-claude-mirror)
+1. Install [ABAP Mirror](https://marketplace.visualstudio.com/items?itemName=abgunes.abap-mirror)
    from the VS Code Marketplace, alongside `sapse.adt-vscode`.
 2. Open any ABAP object through ADT as you normally would.
 3. That's it: the mirror file appears automatically, and Claude Code can read/edit it like any other file in your
@@ -85,21 +85,18 @@ the package), you'll get a warning notification instead of the edit silently van
 
 | Command | What it does |
 |---|---|
-| **ABAP Claude Mirror - Open Mirror Object** | Opens (or refocuses) the mirror file for the active ABAP document. Available via right-click in the editor, on the editor tab, or the Command Palette. |
-| **ABAP Claude Mirror - Mirror Folder (with Sub-Objects)** | Mirrors every object under the right-clicked ABAP package or folder, recursively, without opening editor tabs. Available via right-click on any `abap://` folder in the Explorer tree. |
+| **ABAP Mirror - Open Mirror Object** | Opens (or refocuses) the mirror file for the active ABAP document. Available via right-click in the editor, on the editor tab, or the Command Palette. |
+| **ABAP Mirror - Mirror Folder (with Sub-Objects)** | Mirrors every object under the right-clicked ABAP package or folder, recursively, without opening editor tabs. Available via right-click on any `abap://` folder in the Explorer tree. |
 
 ## Settings
 
 | Setting | Default | Description |
 |---|---|---|
-| `abapClaudeMirror.enabled` | `true` | Turn mirroring on or off. Takes effect immediately, no reload needed. When off, no mirror files are created/updated and nothing is synced back into `abap://` documents; existing mirror files are left untouched. |
+| `abapMirror.enabled` | `true` | Turn mirroring on or off. Takes effect immediately, no reload needed. When off, no mirror files are created/updated and nothing is synced back into `abap://` documents; existing mirror files are left untouched. |
 
 ## Where mirror files live
 
-`~/.claude-abap-mirror/`: one file per ABAP object, nested in folders that match its repository path (so paths
-stay unique), with a short, readable leaf filename, e.g. `abapClaudeMirror - zdemo.prog.abap.abapmirror`. That's
-also what shows up as the tab title. Safe to delete at any time: it's regenerated the next time you open the
-corresponding object.
+`~/.abap-mirror/`: one file per ABAP object, nested in folders that match its repository path (so paths stay unique), with a short, readable leaf filename, e.g. `zdemo.prog.abap.abapmirror`. Mirror editor tabs carry an M badge (colored by sync state) so they are never confused with the real ADT tab. Safe to delete at any time: it's regenerated the next time you open the corresponding object.
 
 ## Known limitations
 
@@ -117,36 +114,27 @@ corresponding object.
 
 ## Release notes
 
-### 0.0.4
+### 0.1.0
 
-- New **ABAP Claude Mirror - Mirror Folder (with Sub-Objects)** command: right-click any ABAP package or folder
-  in ADT's Explorer tree to mirror everything under it, recursively, without opening an editor tab per object.
-  Folders with more than 200 objects ask for confirmation first, and the run is cancellable.
-- New **ABAP Mirror Files** panel in the Explorer sidebar: every mirrored object in its original hierarchy,
-  red while its ADT document has unsaved changes, blue once saved. Folders holding an unsaved object expand
-  automatically.
-- Editing a mirror file whose original ADT document is not open now reopens that document automatically and
-  applies the change to its buffer. Nothing is ever saved to SAP without you.
-- Objects that fail during bulk mirroring are listed in the new "ABAP Claude Mirror" output channel instead of
+First release as **ABAP Mirror**, the successor to ABAP Claude Mirror (`abgunes.abap-claude-mirror`).
+Everything from the previous extension plus:
+
+- **Mirror Folder (with Sub-Objects)** command: right-click any ABAP package or folder in ADT's Explorer
+  tree to mirror everything under it, recursively, without opening an editor tab per object. Folders with
+  more than 200 objects ask for confirmation first, and the run is cancellable.
+- **ABAP Mirror Files** panel in the Explorer sidebar: every mirrored object in its original hierarchy,
+  red while its ADT document has unsaved changes, blue once saved. Folders holding an unsaved object
+  expand automatically.
+- Editing a mirror file whose original ADT document is not open now reopens that document automatically
+  and applies the change to its buffer. Nothing is ever saved to SAP without you.
+- Objects that fail during bulk mirroring are listed in the "ABAP Mirror" output channel instead of
   failing silently.
-- Internal: source files reorganized under `src/`, and the extension package is much smaller.
-
-### 0.0.3
-
-- Documentation updates: Marketplace links and README wording.
-
-### 0.0.2
-
-- Added the demo animation to the README.
-
-### 0.0.1
-
-- Initial release: automatic mirroring of the active ADT document, two-way live sync, ABAP-flavored syntax
-  highlighting, and the Open Mirror Object command.
+- Cleaner mirror filenames: no more name prefix. Mirror tabs are marked with an M badge instead.
+- Codebase converted to TypeScript.
 
 ## Contributing
 
-Issues and pull requests are welcome. See the [project's GitHub page](https://github.com/abgunes/ABAP-Claude-Mirror)
+Issues and pull requests are welcome. See the [project's GitHub page](https://github.com/abgunes/ABAP-Mirror)
 for details.
 
 ## License

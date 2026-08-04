@@ -6,7 +6,7 @@ const { collectLeaves, shouldConfirm, runWithConcurrency, DEFAULT_CONFIRM_THRESH
 const { createSyncStateStore } = require('./syncState');
 const { MirrorTreeDataProvider, MirrorDecorationProvider } = require('./mirrorTreeProvider');
 
-const MIRROR_ROOT = path.join(os.homedir(), '.claude-abap-mirror');
+const MIRROR_ROOT = path.join(os.homedir(), '.abap-mirror');
 const mirrorToAbapUri = new Map();
 // abap uris whose mirror the user closed on purpose: do not auto-reopen
 // until the abap tab itself is closed and reopened fresh.
@@ -22,10 +22,10 @@ const syncStateStore = createSyncStateStore();
 const bulkTrackedMirrors = new Set();
 // where per-object failures during bulk mirroring are logged, since the
 // progress notification only has room for a final count.
-const outputChannel = vscode.window.createOutputChannel('ABAP Claude Mirror');
+const outputChannel = vscode.window.createOutputChannel('ABAP Mirror');
 
 function isEnabled() {
-  return vscode.workspace.getConfiguration('abapClaudeMirror').get('enabled', true);
+  return vscode.workspace.getConfiguration('abapMirror').get('enabled', true);
 }
 
 function sanitizeSegment(segment) {
@@ -45,7 +45,7 @@ function mirrorPathFor(uri) {
   // *.ddls.acds / etc. registrations. Matching one of those would hand the
   // mirror to ADT's language server/Joule completion, which fails trying
   // to resolve an ABAP project for a path that isn't part of any real one.
-  const rawPath = path.join(dir, `abapClaudeMirror - ${leaf}.abapmirror`);
+  const rawPath = path.join(dir, `${leaf}.abapmirror`);
   // Route through vscode.Uri so the result matches VS Code's own drive-letter
   // casing/normalization. Otherwise this string won't equal the fsPath VS
   // Code reports back from tabs, visibleTextEditors, or the file watcher,
@@ -80,7 +80,7 @@ async function pushMirrorChangeToAbap(mirrorPath) {
       needsReveal = true;
     } catch (e) {
       vscode.window.showWarningMessage(
-        `ABAP Claude Mirror: could not reopen ${abapUriString} to sync change back (${e.message})`
+        `ABAP Mirror: could not reopen ${abapUriString} to sync change back (${e.message})`
       );
       return;
     }
@@ -171,7 +171,7 @@ async function handleActiveEditorChange(editor) {
 
 async function openMirrorCommand(uriArg) {
   if (!isEnabled()) {
-    vscode.window.showWarningMessage('ABAP Claude Mirror is disabled (abapClaudeMirror.enabled).');
+    vscode.window.showWarningMessage('ABAP Mirror is disabled (abapMirror.enabled).');
     return;
   }
 
@@ -180,7 +180,7 @@ async function openMirrorCommand(uriArg) {
     uri = vscode.window.activeTextEditor.document.uri;
   }
   if (!uri || uri.scheme !== 'abap') {
-    vscode.window.showWarningMessage('ABAP Claude Mirror: pick an open ABAP (abap://) document first.');
+    vscode.window.showWarningMessage('ABAP Mirror: pick an open ABAP (abap://) document first.');
     return;
   }
 
@@ -198,13 +198,13 @@ async function openMirrorCommand(uriArg) {
 
 async function mirrorFolderCommand(uriArg) {
   if (!isEnabled()) {
-    vscode.window.showWarningMessage('ABAP Claude Mirror is disabled (abapClaudeMirror.enabled).');
+    vscode.window.showWarningMessage('ABAP Mirror is disabled (abapMirror.enabled).');
     return;
   }
 
   const folderUri = uriArg instanceof vscode.Uri ? uriArg : undefined;
   if (!folderUri || folderUri.scheme !== 'abap') {
-    vscode.window.showWarningMessage('ABAP Claude Mirror: right-click an ABAP (abap://) folder to mirror it.');
+    vscode.window.showWarningMessage('ABAP Mirror: right-click an ABAP (abap://) folder to mirror it.');
     return;
   }
 
@@ -221,12 +221,12 @@ async function mirrorFolderCommand(uriArg) {
       (uri, e) => outputChannel.appendLine(`Could not list ${uri.toString()}: ${e.message}`)
     );
   } catch (e) {
-    vscode.window.showErrorMessage(`ABAP Claude Mirror: could not read folder contents (${e.message})`);
+    vscode.window.showErrorMessage(`ABAP Mirror: could not read folder contents (${e.message})`);
     return;
   }
 
   if (leaves.length === 0) {
-    vscode.window.showInformationMessage('ABAP Claude Mirror: this folder has no objects to mirror.');
+    vscode.window.showInformationMessage('ABAP Mirror: this folder has no objects to mirror.');
     return;
   }
 
@@ -243,7 +243,7 @@ async function mirrorFolderCommand(uriArg) {
   let skipped = 0;
 
   await vscode.window.withProgress(
-    { location: vscode.ProgressLocation.Notification, title: 'ABAP Claude Mirror: mirroring folder', cancellable: true },
+    { location: vscode.ProgressLocation.Notification, title: 'ABAP Mirror: mirroring folder', cancellable: true },
     async (progress, token) => {
       await runWithConcurrency(
         leaves,
@@ -269,7 +269,7 @@ async function mirrorFolderCommand(uriArg) {
   );
 
   vscode.window.showInformationMessage(
-    `ABAP Claude Mirror: ${mirrored} object(s) mirrored${skipped ? `, ${skipped} skipped (see "ABAP Claude Mirror" output channel for details)` : ''}.`
+    `ABAP Mirror: ${mirrored} object(s) mirrored${skipped ? `, ${skipped} skipped (see "ABAP Mirror" output channel for details)` : ''}.`
   );
 }
 
@@ -277,7 +277,7 @@ function activate(context) {
   if (!fs.existsSync(MIRROR_ROOT)) fs.mkdirSync(MIRROR_ROOT, { recursive: true });
 
   const mirrorTreeProvider = new MirrorTreeDataProvider(MIRROR_ROOT, syncStateStore);
-  context.subscriptions.push(vscode.window.registerTreeDataProvider('abapClaudeMirrorFiles', mirrorTreeProvider));
+  context.subscriptions.push(vscode.window.registerTreeDataProvider('abapMirror.files', mirrorTreeProvider));
   context.subscriptions.push(mirrorTreeProvider);
 
   const mirrorDecorationProvider = new MirrorDecorationProvider(syncStateStore);
@@ -285,8 +285,8 @@ function activate(context) {
   context.subscriptions.push(mirrorDecorationProvider);
 
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(handleActiveEditorChange));
-  context.subscriptions.push(vscode.commands.registerCommand('abapClaudeMirror.openMirror', openMirrorCommand));
-  context.subscriptions.push(vscode.commands.registerCommand('abapClaudeMirror.mirrorFolder', mirrorFolderCommand));
+  context.subscriptions.push(vscode.commands.registerCommand('abapMirror.open', openMirrorCommand));
+  context.subscriptions.push(vscode.commands.registerCommand('abapMirror.folder', mirrorFolderCommand));
   context.subscriptions.push(outputChannel);
 
   context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => {

@@ -1,8 +1,8 @@
 {
-  "name": "abap-claude-mirror",
-  "displayName": "ABAP Claude Mirror",
-  "description": "Mirrors the active ADT (abap://) document to a real file and focuses it, so Claude Code's file context can read it",
-  "version": "0.0.4",
+  "name": "abap-mirror",
+  "displayName": "ABAP Mirror",
+  "description": "Mirrors SAP ADT (abap://) documents to real files so AI coding assistants like Claude Code can read and edit them, with every change staying under your review.",
+  "version": "0.1.0",
   "publisher": "abgunes",
   "license": "MIT",
   "scripts": {
@@ -10,11 +10,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/abgunes/ABAP-Claude-Mirror"
+    "url": "https://github.com/abgunes/ABAP-Mirror"
   },
-  "homepage": "https://github.com/abgunes/ABAP-Claude-Mirror",
+  "homepage": "https://github.com/abgunes/ABAP-Mirror",
   "bugs": {
-    "url": "https://github.com/abgunes/ABAP-Claude-Mirror/issues"
+    "url": "https://github.com/abgunes/ABAP-Mirror/issues"
   },
   "engines": { "vscode": "^1.80.0" },
   "icon": "images/icon.png",
@@ -24,9 +24,9 @@
   "main": "./src/extension.js",
   "contributes": {
     "configuration": {
-      "title": "ABAP Claude Mirror",
+      "title": "ABAP Mirror",
       "properties": {
-        "abapClaudeMirror.enabled": {
+        "abapMirror.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Mirror active abap:// ADT documents to real files (and sync edits back) so Claude Code can read/edit them. Toggle off to fully disable, no reload needed."
@@ -35,34 +35,34 @@
     },
     "commands": [
       {
-        "command": "abapClaudeMirror.openMirror",
-        "title": "ABAP Claude Mirror - Open Mirror Object"
+        "command": "abapMirror.open",
+        "title": "ABAP Mirror - Open Mirror Object"
       },
       {
-        "command": "abapClaudeMirror.mirrorFolder",
-        "title": "ABAP Claude Mirror - Mirror Folder (with Sub-Objects)"
+        "command": "abapMirror.folder",
+        "title": "ABAP Mirror - Mirror Folder (with Sub-Objects)"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "abapClaudeMirror.openMirror",
+          "command": "abapMirror.open",
           "when": "resourceScheme == abap",
-          "group": "z_abapClaudeMirror@1"
+          "group": "z_abapMirror@1"
         }
       ],
       "editor/title/context": [
         {
-          "command": "abapClaudeMirror.openMirror",
+          "command": "abapMirror.open",
           "when": "resourceScheme == abap",
-          "group": "z_abapClaudeMirror@1"
+          "group": "z_abapMirror@1"
         }
       ],
       "explorer/context": [
         {
-          "command": "abapClaudeMirror.mirrorFolder",
+          "command": "abapMirror.folder",
           "when": "resourceScheme == abap && explorerResourceIsFolder",
-          "group": "z_abapClaudeMirror@1"
+          "group": "z_abapMirror@1"
         }
       ]
     },
@@ -84,7 +84,7 @@
     "views": {
       "explorer": [
         {
-          "id": "abapClaudeMirrorFiles",
+          "id": "abapMirror.files",
           "name": "ABAP Mirror Files"
         }
       ]

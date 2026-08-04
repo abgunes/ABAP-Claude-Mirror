@@ -71,10 +71,10 @@ class MirrorDecorationProvider {
   provideFileDecoration(uri) {
     const state = this.syncStateStore.get(uri.fsPath);
     if (state === 'changed') {
-      return { color: new vscode.ThemeColor('charts.red'), tooltip: 'Unsaved changes pending in ADT' };
+      return { badge: 'M', color: new vscode.ThemeColor('charts.red'), tooltip: 'Mirror file: unsaved changes pending in ADT' };
     }
     if (state === 'synced') {
-      return { color: new vscode.ThemeColor('charts.blue'), tooltip: 'Synced with ADT' };
+      return { badge: 'M', color: new vscode.ThemeColor('charts.blue'), tooltip: 'Mirror file: synced with ADT' };
     }
     return undefined;
   }
