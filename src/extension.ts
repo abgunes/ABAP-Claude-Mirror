@@ -168,7 +168,7 @@ async function handleActiveEditorChange(editor: vscode.TextEditor | undefined): 
   // Only auto-reveal the very first time this ABAP doc becomes active in
   // this session. Every later refocus (e.g. clicking away and back) must
   // leave the mirror alone. Reopening it on demand is what the
-  // "Open Mirrored File (Claude)" command/context-menu entry is for.
+  // "ABAP Mirror - Open Mirror Object" command/context-menu entry is for.
   if (autoRevealedMirrors.has(uriString)) return;
   autoRevealedMirrors.add(uriString);
 
