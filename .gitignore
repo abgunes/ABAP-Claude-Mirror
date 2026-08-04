@@ -1,5 +1,6 @@
 *.vsix
 node_modules/
+out/
 .DS_Store
 Thumbs.db
 docs/
