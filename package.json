@@ -6,6 +6,10 @@
   "publisher": "abgunes",
   "license": "MIT",
   "scripts": {
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "vscode:prepublish": "npm run compile",
+    "pretest": "npm run compile",
     "test": "node --test test/*.test.js"
   },
   "repository": {
@@ -16,11 +20,25 @@
   "bugs": {
     "url": "https://github.com/abgunes/ABAP-Mirror/issues"
   },
-  "engines": { "vscode": "^1.80.0" },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
   "icon": "images/icon.png",
-  "categories": ["Programming Languages", "Other"],
-  "keywords": ["abap", "adt", "sap", "claude", "claude code", "mirror"],
-  "activationEvents": ["onStartupFinished"],
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "abap",
+    "adt",
+    "sap",
+    "claude",
+    "claude code",
+    "mirror"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./src/extension.js",
   "contributes": {
     "configuration": {
@@ -69,8 +87,12 @@
     "languages": [
       {
         "id": "abap-mirror-view",
-        "extensions": [".abapmirror"],
-        "aliases": ["ABAP (mirror view)"],
+        "extensions": [
+          ".abapmirror"
+        ],
+        "aliases": [
+          "ABAP (mirror view)"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -89,5 +111,10 @@
         }
       ]
     }
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "@types/vscode": "^1.125.0",
+    "typescript": "^7.0.2"
   }
 }

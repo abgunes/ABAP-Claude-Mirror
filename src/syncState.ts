@@ -1,7 +1,18 @@
-const { EventEmitter } = require('node:events');
+import { EventEmitter } from 'node:events';
 
-function createSyncStateStore() {
-  const state = new Map();
+export type SyncState = 'synced' | 'changed';
+
+export interface SyncStateStore {
+  register(mirrorPath: string): void;
+  markChanged(mirrorPath: string): void;
+  markSynced(mirrorPath: string): void;
+  get(mirrorPath: string): SyncState | undefined;
+  entries(): Array<{ mirrorPath: string; state: SyncState }>;
+  onDidChange(listener: () => void): { dispose(): void };
+}
+
+export function createSyncStateStore(): SyncStateStore {
+  const state = new Map<string, SyncState>();
   const emitter = new EventEmitter();
 
   return {
@@ -31,9 +42,7 @@ function createSyncStateStore() {
     },
     onDidChange(listener) {
       emitter.on('change', listener);
-      return { dispose: () => emitter.off('change', listener) };
+      return { dispose: () => void emitter.off('change', listener) };
     },
   };
 }
-
-module.exports = { createSyncStateStore };

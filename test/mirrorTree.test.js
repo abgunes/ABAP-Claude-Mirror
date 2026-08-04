@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { buildMirrorTree, folderContainsChanged } = require('../src/mirrorTree');
+const { buildMirrorTree, folderContainsChanged } = require('../out/mirrorTree');
 
 test('buildMirrorTree nests entries under folders matching their path segments', () => {
   const root = path.join('C:', 'mirror-root');

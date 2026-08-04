@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { createSyncStateStore } = require('../src/syncState');
+const { createSyncStateStore } = require('../out/syncState');
 
 test('register sets a new mirror path to synced', () => {
   const store = createSyncStateStore();

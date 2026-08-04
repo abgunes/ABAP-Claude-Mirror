@@ -2,8 +2,8 @@ const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { collectLeaves, shouldConfirm, runWithConcurrency, DEFAULT_CONFIRM_THRESHOLD, DEFAULT_READ_CONCURRENCY } = require('./folderMirror');
-const { createSyncStateStore } = require('./syncState');
+const { collectLeaves, shouldConfirm, runWithConcurrency, DEFAULT_CONFIRM_THRESHOLD, DEFAULT_READ_CONCURRENCY } = require('../out/folderMirror');
+const { createSyncStateStore } = require('../out/syncState');
 const { MirrorTreeDataProvider, MirrorDecorationProvider } = require('./mirrorTreeProvider');
 
 const MIRROR_ROOT = path.join(os.homedir(), '.abap-mirror');

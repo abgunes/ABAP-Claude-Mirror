@@ -1,6 +1,6 @@
 // mirrorTreeProvider.js
 const vscode = require('vscode');
-const { buildMirrorTree, folderContainsChanged } = require('./mirrorTree');
+const { buildMirrorTree, folderContainsChanged } = require('../out/mirrorTree');
 
 class MirrorTreeDataProvider {
   constructor(mirrorRoot, syncStateStore) {
