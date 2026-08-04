@@ -2,7 +2,7 @@
   "name": "abap-claude-mirror",
   "displayName": "ABAP Claude Mirror",
   "description": "Mirrors the active ADT (abap://) document to a real file and focuses it, so Claude Code's file context can read it",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "abgunes",
   "license": "MIT",
   "scripts": {

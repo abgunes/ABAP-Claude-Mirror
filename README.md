@@ -86,6 +86,7 @@ the package), you'll get a warning notification instead of the edit silently van
 | Command | What it does |
 |---|---|
 | **ABAP Claude Mirror - Open Mirror Object** | Opens (or refocuses) the mirror file for the active ABAP document. Available via right-click in the editor, on the editor tab, or the Command Palette. |
+| **ABAP Claude Mirror - Mirror Folder (with Sub-Objects)** | Mirrors every object under the right-clicked ABAP package or folder, recursively, without opening editor tabs. Available via right-click on any `abap://` folder in the Explorer tree. |
 
 ## Settings
 
@@ -113,6 +114,35 @@ corresponding object.
 - The mirror status view's red/blue coloring is provided through VS Code's file decoration API, which is
   per-file rather than per-view, so the same coloring may also show up on a mirrored file elsewhere in VS Code
   (for example, an open editor tab), not only inside the ABAP Mirror Files panel.
+
+## Release notes
+
+### 0.0.4
+
+- New **ABAP Claude Mirror - Mirror Folder (with Sub-Objects)** command: right-click any ABAP package or folder
+  in ADT's Explorer tree to mirror everything under it, recursively, without opening an editor tab per object.
+  Folders with more than 200 objects ask for confirmation first, and the run is cancellable.
+- New **ABAP Mirror Files** panel in the Explorer sidebar: every mirrored object in its original hierarchy,
+  red while its ADT document has unsaved changes, blue once saved. Folders holding an unsaved object expand
+  automatically.
+- Editing a mirror file whose original ADT document is not open now reopens that document automatically and
+  applies the change to its buffer. Nothing is ever saved to SAP without you.
+- Objects that fail during bulk mirroring are listed in the new "ABAP Claude Mirror" output channel instead of
+  failing silently.
+- Internal: source files reorganized under `src/`, and the extension package is much smaller.
+
+### 0.0.3
+
+- Documentation updates: Marketplace links and README wording.
+
+### 0.0.2
+
+- Added the demo animation to the README.
+
+### 0.0.1
+
+- Initial release: automatic mirroring of the active ADT document, two-way live sync, ABAP-flavored syntax
+  highlighting, and the Open Mirror Object command.
 
 ## Contributing
 
