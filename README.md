@@ -116,7 +116,8 @@ the package), you will get a warning notification instead of the edit silently v
 
 ### 0.1.0
 
-First release as **ABAP Mirror**, the successor to ABAP Claude Mirror (`abgunes.abap-claude-mirror`).
+First release as **ABAP Mirror**, the successor to
+[ABAP Claude Mirror](https://marketplace.visualstudio.com/items?itemName=abgunes.abap-claude-mirror).
 Everything from the previous extension plus:
 
 - **Mirror Folder (with Sub-Objects)** command: right-click any ABAP package or folder in ADT's Explorer
